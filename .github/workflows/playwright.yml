@@ -7,6 +7,11 @@ on:
     branches: [ main, develop ]
   workflow_dispatch: # Permite ejecutar manualmente desde GitHub
 
+env:
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nutriapp
+  CI: true
+  BASE_URL: http://localhost:3000
+
 jobs:
   test:
     timeout-minutes: 60
@@ -28,9 +33,11 @@ jobs:
           - 5432:5432
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
-    - uses: actions/setup-node@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
         node-version: 20
         cache: 'npm'
@@ -41,31 +48,61 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          echo "Waiting for PostgreSQL..."
+          sleep 2
+        done
+        echo "PostgreSQL is ready!"
+    
     - name: Setup Prisma
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nutriapp
+        DATABASE_URL: ${{ env.DATABASE_URL }}
       run: |
+        echo "Generating Prisma Client..."
         npx prisma generate
+        echo "Running database migrations..."
         npx prisma migrate deploy
+        echo "Database setup complete!"
+    
+    - name: (Optional) Seed database
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+      run: |
+        # Descomenta la siguiente línea si quieres ejecutar el seed en CI
+        # node --loader ts-node/esm seed.ts || echo "Seed script skipped or failed"
+        echo "Seed script skipped (uncomment to enable)"
+      continue-on-error: true
     
     - name: Run Playwright tests
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nutriapp
-        CI: true
-        BASE_URL: http://localhost:3000
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        CI: ${{ env.CI }}
+        BASE_URL: ${{ env.BASE_URL }}
       run: npm test
-      continue-on-error: false
     
-    - uses: actions/upload-artifact@v4
+    - name: Upload Playwright HTML Report
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
     
-    - uses: actions/upload-artifact@v4
+    - name: Upload Playwright Test Results
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: playwright-traces
         path: test-results/
+        retention-days: 7
+    
+    - name: Upload Playwright Screenshots
+      uses: actions/upload-artifact@v4
+      if: failure()
+      continue-on-error: true
+      with:
+        name: playwright-screenshots
+        path: test-results/**/*.png
         retention-days: 7
