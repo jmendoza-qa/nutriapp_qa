@@ -4,12 +4,12 @@ import { LoginPage, DishesPage, NewDishPage, DishDetailPage } from '../../page-o
 test.describe('CRUD - Dishes (POM)', () => {
   test('Full CRUD: create → view → edit → delete', async ({ page }) => {
     const login = new LoginPage(page);
-    await login.goto();
+    await login.navigate();
     await login.login('test@nutriapp.com', 'nutriapp123');
     await expect(page).toHaveURL(/\/dishes/);
 
     const dishes = new DishesPage(page);
-    await dishes.goto();
+    await dishes.navigate();
 
     // CREATE
     await dishes.clickAddDish();

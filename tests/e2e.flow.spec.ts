@@ -4,7 +4,7 @@ import { LoginPage, DishesPage, DishDetailPage, NewDishPage } from '../page-obje
 test.describe('E2E Flow - Create -> View -> Delete (POM)', () => {
   test('Create a dish, view details, then delete it from list', async ({ page }) => {
     const login = new LoginPage(page);
-    await login.goto();
+    await login.navigate();
     await login.login('test@nutriapp.com', 'nutriapp123');
     await expect(page).toHaveURL(/\/dishes/);
 

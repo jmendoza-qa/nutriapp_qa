@@ -4,14 +4,14 @@ import { LoginPage, DishesPage, NewDishPage } from '../page-objects/index.js';
 test.describe('Dishes - Functional (POM)', () => {
   test.beforeEach(async ({ page }) => {
     const login = new LoginPage(page);
-    await login.goto();
+    await login.navigate();
     await login.login('test@nutriapp.com', 'nutriapp123');
     await expect(page).toHaveURL(/\/dishes/);
   });
 
   test('Create a new dish and verify it appears in the list (happy path)', async ({ page }) => {
     const dishes = new DishesPage(page);
-    await dishes.goto();
+    await dishes.navigate();
     await dishes.clickAddDish();
 
     const newDish = new NewDishPage(page);
@@ -29,7 +29,7 @@ test.describe('Dishes - Functional (POM)', () => {
 
   test('Create validation: missing name shows form still open', async ({ page }) => {
     const dishes = new DishesPage(page);
-    await dishes.goto();
+    await dishes.navigate();
     await dishes.clickAddDish();
 
     const newDish = new NewDishPage(page);

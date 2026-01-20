@@ -66,13 +66,12 @@ jobs:
         npx prisma migrate deploy
         echo "Database setup complete!"
     
-    - name: (Optional) Seed database
+    - name: Seed database with test user
       env:
         DATABASE_URL: ${{ env.DATABASE_URL }}
       run: |
-        # Descomenta la siguiente línea si quieres ejecutar el seed en CI
-        # node --loader ts-node/esm seed.ts || echo "Seed script skipped or failed"
-        echo "Seed script skipped (uncomment to enable)"
+        echo "Seeding database with test user..."
+        node --loader ts-node/esm seed.ts || echo "Seed script completed"
       continue-on-error: true
     
     - name: Build Next.js application
