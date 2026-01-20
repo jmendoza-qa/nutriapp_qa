@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { DishesPage } from '../../pages/DishesPage';
-import { NewDishPage } from '../../pages/NewDishPage';
-import { EditDishPage } from '../../pages/EditDishPage';
-import { ViewDishPage } from '../../pages/ViewDishPage';
+import { DishesPage } from '../../page-objects/DishesPage';
+import { NewDishPage } from '../../page-objects/NewDishPage';
+import { EditDishPage } from '../../page-objects/EditDishPage';
+import { ViewDishPage } from '../../page-objects/ViewDishPage';
 import { loginViaAPI } from '../helpers/auth';
 
 test.describe('End-to-End: Dish CRUD Journey', () => {

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage, DishesPage } from '../pages';
+import { LoginPage, DishesPage } from '../page-objects';
 
 test.describe('Auth - Functional (POM)', () => {
   test.beforeEach(async ({ page }) => {

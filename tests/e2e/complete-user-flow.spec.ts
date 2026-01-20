@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { HomePage } from '../../pages/HomePage';
-import { LoginPage } from '../../pages/LoginPage';
-import { DishesPage } from '../../pages/DishesPage';
-import { NewDishPage } from '../../pages/NewDishPage';
+import { HomePage } from '../../page-objects/HomePage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { DishesPage } from '../../page-objects/DishesPage';
+import { NewDishPage } from '../../page-objects/NewDishPage';
 import { loginViaAPI } from '../helpers/auth';
 
 test.describe('End-to-End: Complete User Flow', () => {

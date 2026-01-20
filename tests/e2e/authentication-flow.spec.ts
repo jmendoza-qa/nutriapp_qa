@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
-import { DishesPage } from '../../pages/DishesPage';
-import { RegisterPage } from '../../pages/RegisterPage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { DishesPage } from '../../page-objects/DishesPage';
+import { RegisterPage } from '../../page-objects/RegisterPage';
 
 test.describe('End-to-End: Authentication Flow', () => {
   test('should handle authentication: login → access protected page → logout attempt', async ({ page }) => {

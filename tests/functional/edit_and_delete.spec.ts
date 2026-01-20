@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
-import { DishesPage } from '../../pages/DishesPage';
-import { NewDishPage } from '../../pages/NewDishPage';
+import { LoginPage } from '../../page-objects/LoginPage';
+import { DishesPage } from '../../page-objects/DishesPage';
+import { NewDishPage } from '../../page-objects/NewDishPage';
 
 test.describe('Functional: Edit and Delete Dish (POM)', () => {
   test('Create -> Edit -> Verify -> Delete -> Confirm removal', async ({ page }) => {
