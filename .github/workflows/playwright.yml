@@ -75,12 +75,23 @@ jobs:
         echo "Seed script skipped (uncomment to enable)"
       continue-on-error: true
     
+    - name: Build Next.js application
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        NODE_ENV: production
+      run: |
+        echo "Building Next.js application..."
+        npm run build
+        echo "Build complete!"
+    
     - name: Run Playwright tests
       env:
         DATABASE_URL: ${{ env.DATABASE_URL }}
         CI: ${{ env.CI }}
         BASE_URL: ${{ env.BASE_URL }}
+        NODE_ENV: production
       run: npm test
+      timeout-minutes: 30
     
     - name: Upload Playwright HTML Report
       uses: actions/upload-artifact@v4

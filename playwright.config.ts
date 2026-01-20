@@ -75,10 +75,14 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    command: process.env.CI 
+      ? 'npm start' // En CI: usar servidor de producción (build ya hecho en workflow)
+      : 'npm run dev', // Local: dev server con hot reload
     url: process.env.BASE_URL || 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: process.env.CI ? 60 * 1000 : 120 * 1000, // Menos tiempo en CI porque build ya está hecho
+    stdout: 'pipe',
+    stderr: 'pipe',
   },
 });
 
