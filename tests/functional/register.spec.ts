@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { RegisterPage } from '../../page-objects/RegisterPage';
+import { RegisterPage } from '../../page-objects/RegisterPage.js';
 
 test.describe('Registration Functionality', () => {
   let registerPage: RegisterPage;

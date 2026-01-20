@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { DishesPage } from '../../page-objects/DishesPage';
-import { NewDishPage } from '../../page-objects/NewDishPage';
-import { EditDishPage } from '../../page-objects/EditDishPage';
-import { ViewDishPage } from '../../page-objects/ViewDishPage';
+import { DishesPage } from '../../page-objects/DishesPage.js';
+import { NewDishPage } from '../../page-objects/NewDishPage.js';
+import { EditDishPage } from '../../page-objects/EditDishPage.js';
+import { ViewDishPage } from '../../page-objects/ViewDishPage.js';
 import { loginViaAPI } from '../helpers/auth';
 
 test.describe('Dishes Management Functionality', () => {

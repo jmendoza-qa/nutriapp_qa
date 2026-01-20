@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage, DishesPage, NewDishPage, DishDetailPage } from '../../page-objects/index.js';
+import { LoginPage, DishesPage, NewDishPage, DishDetailPage } from '../../page-objects/index.js.js';
 
 test.describe('CRUD - Dishes (POM)', () => {
   test('Full CRUD: create → view → edit → delete', async ({ page }) => {

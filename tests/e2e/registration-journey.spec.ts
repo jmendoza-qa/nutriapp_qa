@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { RegisterPage } from '../../page-objects/RegisterPage';
-import { LoginPage } from '../../page-objects/LoginPage';
-import { DishesPage } from '../../page-objects/DishesPage';
+import { RegisterPage } from '../../page-objects/RegisterPage.js';
+import { LoginPage } from '../../page-objects/LoginPage.js';
+import { DishesPage } from '../../page-objects/DishesPage.js';
 
 test.describe('End-to-End: User Registration Journey', () => {
   test('should complete full registration flow: register → login → view dishes', async ({ page }) => {

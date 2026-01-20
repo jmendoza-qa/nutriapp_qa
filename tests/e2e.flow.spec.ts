@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage, DishesPage, DishDetailPage, NewDishPage } from '../page-objects';
+import { LoginPage, DishesPage, DishDetailPage, NewDishPage } from '../page-objects/index.js';
 
 test.describe('E2E Flow - Create -> View -> Delete (POM)', () => {
   test('Create a dish, view details, then delete it from list', async ({ page }) => {

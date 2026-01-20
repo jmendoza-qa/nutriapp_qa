@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { NewDishPage } from '../../page-objects/NewDishPage';
+import { NewDishPage } from '../../page-objects/NewDishPage.js';
 import { loginViaAPI } from '../helpers/auth';
 
 test.describe('Form Validation', () => {
