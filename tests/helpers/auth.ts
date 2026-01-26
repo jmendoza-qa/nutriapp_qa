@@ -5,7 +5,11 @@ import { Page } from '@playwright/test';
  */
 export async function loginViaAPI(page: Page, email: string = 'test@nutriapp.com', password: string = 'nutriapp123') {
   // Get the base URL from the page context or use default
-  const baseURL = page.context().baseURL || 'http://localhost:3000';
+  const baseURL = page.context().baseURL || process.env.BASE_URL || 'http://localhost:3000';
+  
+  // Parse the base URL to extract domain
+  const url = new URL(baseURL);
+  const domain = url.hostname;
   
   // Make API call to login
   const response = await page.request.post(`${baseURL}/api/login`, {
@@ -17,7 +21,16 @@ export async function loginViaAPI(page: Page, email: string = 'test@nutriapp.com
   }
 
   // Get the session cookie from the response
-  const cookies = response.headers()['set-cookie'];
+  // set-cookie can be a string or an array of strings
+  const setCookieHeader = response.headers()['set-cookie'];
+  let cookies: string | undefined;
+  
+  if (Array.isArray(setCookieHeader)) {
+    cookies = setCookieHeader.join('; ');
+  } else if (typeof setCookieHeader === 'string') {
+    cookies = setCookieHeader;
+  }
+  
   if (cookies) {
     // Extract session cookie value
     const sessionMatch = cookies.match(/session=([^;]+)/);
@@ -27,7 +40,7 @@ export async function loginViaAPI(page: Page, email: string = 'test@nutriapp.com
       await page.context().addCookies([{
         name: 'session',
         value: sessionValue,
-        domain: 'localhost',
+        domain: domain,
         path: '/',
         httpOnly: true,
         sameSite: 'Lax',
