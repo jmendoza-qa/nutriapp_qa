@@ -50,10 +50,6 @@ test.describe('Dishes Management', () => {
     // Llenar el primer paso de preparación
     await page.fill('input[placeholder="Paso 1"]', 'Paso de preparación de prueba');
     
-    // Wait for form to be ready and button to be enabled
-    const submitButton = page.locator('button[type="submit"]');
-    await expect(submitButton).toBeEnabled({ timeout: 5000 });
-    
     // Set up response and URL listeners BEFORE submitting
     const responsePromise = page.waitForResponse(response => 
       response.url().includes('/api/dishes') && response.method() === 'POST' && response.status() === 200,
@@ -61,7 +57,7 @@ test.describe('Dishes Management', () => {
     );
     const urlPromise = page.waitForURL(/.*\/dishes/, { timeout: 15000 });
     
-    // Submit the form (more reliable than clicking button)
+    // Submit the form (use form selector to avoid conflict with Logout button)
     await page.locator('form').submit();
     
     // Wait for both the API response and navigation

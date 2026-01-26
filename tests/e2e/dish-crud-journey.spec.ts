@@ -169,10 +169,10 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
       
       // If dish is still present, wait and reload again
       if (retries > 1) {
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(2000);
         await page.reload();
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1000);
       }
       
       retries--;
