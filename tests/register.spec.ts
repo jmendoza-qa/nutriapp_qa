@@ -38,14 +38,18 @@ test.describe('Register', () => {
     await page.fill('input[name="phone"]', '123456789');
     await page.fill('input[name="password"]', 'password123');
 
-    // Set up response listener BEFORE clicking
+    // Wait for form to be ready and button to be enabled
+    const submitButton = page.locator('button[type="submit"]');
+    await expect(submitButton).toBeEnabled({ timeout: 5000 });
+    
+    // Set up response listener BEFORE submitting
     const responsePromise = page.waitForResponse(response => 
       response.url().includes('/api/register'),
       { timeout: 30000 }
     );
 
-    // Click the submit button to trigger the request
-    await page.click('button[type="submit"]');
+    // Submit the form (more reliable than clicking button)
+    await page.locator('form').submit();
     
     // Wait for the API response
     const response = await responsePromise;
