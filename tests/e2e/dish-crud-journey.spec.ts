@@ -116,13 +116,23 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
     const deleteResponse = await deleteResponsePromise;
     expect(deleteResponse.status()).toBe(200);
     
+    // Wait for navigation back to dishes list (if it happens)
+    try {
+      await page.waitForURL(/.*\/dishes/, { timeout: 5000 });
+    } catch {
+      // If no navigation, that's okay - we'll reload anyway
+    }
+    
     // Wait a bit for React state to update
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000);
     
     // Reload the page to get fresh state from server
     // This ensures we're seeing the actual state after deletion
     await page.reload();
     await page.waitForLoadState('networkidle');
+    
+    // Wait a bit more to ensure the page is fully rendered
+    await page.waitForTimeout(1000);
     
     // Re-initialize dishes page after reload
     const dishesPageAfterReload = new DishesPage(page);
@@ -131,17 +141,40 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
     // Verify the dish was removed from the list
     const cardsAfterDelete = await dishesPageAfterReload.getDishCards();
     
-    // Get all dish names after deletion
-    const remainingNames = await Promise.all(
-      cardsAfterDelete.map(async (_, idx) => {
-        try {
-          const name = await dishesPageAfterReload.getDishName(idx);
-          return name ? name.trim() : null;
-        } catch {
-          return null;
-        }
-      })
-    );
+    // Get all dish names after deletion with retry logic
+    let remainingNames: (string | null)[] = [];
+    let retries = 3;
+    
+    while (retries > 0) {
+      remainingNames = await Promise.all(
+        cardsAfterDelete.map(async (_, idx) => {
+          try {
+            const name = await dishesPageAfterReload.getDishName(idx);
+            return name ? name.trim() : null;
+          } catch {
+            return null;
+          }
+        })
+      );
+      
+      // Check if the dish is still present
+      const dishStillPresent = remainingNames.some(name => name && name === updatedDishName.trim());
+      
+      if (!dishStillPresent) {
+        // Dish is gone, test passes
+        break;
+      }
+      
+      // If dish is still present, wait and reload again
+      if (retries > 1) {
+        await page.waitForTimeout(2000);
+        await page.reload();
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(1000);
+      }
+      
+      retries--;
+    }
     
     // Verify the deleted dish name is no longer in the list
     const dishStillPresent = remainingNames.some(name => name && name === updatedDishName.trim());

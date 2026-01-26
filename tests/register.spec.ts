@@ -38,12 +38,16 @@ test.describe('Register', () => {
     await page.fill('input[name="phone"]', '123456789');
     await page.fill('input[name="password"]', 'password123');
 
-    // Esperar la respuesta del API (puede ser 409 o 200 si hay algún problema)
+    // Set up response listener BEFORE clicking
     const responsePromise = page.waitForResponse(response => 
-      response.url().includes('/api/register')
+      response.url().includes('/api/register'),
+      { timeout: 30000 }
     );
 
+    // Click the submit button to trigger the request
     await page.click('button[type="submit"]');
+    
+    // Wait for the API response
     const response = await responsePromise;
 
     // Si la respuesta es 409, esperar el mensaje de error

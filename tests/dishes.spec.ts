@@ -50,14 +50,17 @@ test.describe('Dishes Management', () => {
     // Llenar el primer paso de preparación
     await page.fill('input[placeholder="Paso 1"]', 'Paso de preparación de prueba');
     
-    // Esperar la respuesta del API y la navegación
-    await Promise.all([
-      page.waitForResponse(response => 
-        response.url().includes('/api/dishes') && response.method() === 'POST' && response.status() === 200
-      ),
-      page.waitForURL(/.*\/dishes/, { timeout: 15000 }),
-      page.click('button[type="submit"]')
-    ]);
+    // Set up response and URL listeners BEFORE clicking
+    const responsePromise = page.waitForResponse(response => 
+      response.url().includes('/api/dishes') && response.method() === 'POST' && response.status() === 200
+    );
+    const urlPromise = page.waitForURL(/.*\/dishes/, { timeout: 15000 });
+    
+    // Click the submit button to trigger the request
+    await page.click('button[type="submit"]');
+    
+    // Wait for both the API response and navigation
+    await Promise.all([responsePromise, urlPromise]);
 
     // Verificar que se redirige a la lista de platos
     await expect(page).toHaveURL(/.*\/dishes/);
