@@ -15,11 +15,10 @@ test.describe('CRUD - Dishes (POM)', () => {
     await dishes.goToNewDish();
     const newDish = new NewDishPage(page);
     const baseName = `CRUD Dish ${Date.now()}`;
-    await newDish.fillBasic(baseName, 'Created by CRUD test');
-    await newDish.addStepInput.fill('Paso inicial');
-    await newDish.addStepButton.click();
-    await newDish.caloriesSpin.fill('320');
-    await newDish.save();
+    await newDish.fillBasicInfo(baseName, 'Created by CRUD test');
+    await newDish.addStep('Paso inicial', 0);
+    await newDish.fillDetails(0, 0, 320);
+    await newDish.submit();
 
     // VERIFY CREATED (LIST)
     const heading = page.getByRole('heading', { level: 2, name: baseName });
@@ -41,7 +40,7 @@ test.describe('CRUD - Dishes (POM)', () => {
     const editForm = new NewDishPage(page);
     const editedName = baseName + ' (edited)';
     await editForm.nameInput.fill(editedName);
-    await editForm.save();
+    await editForm.submit();
     await expect(page.getByRole('heading', { level: 2, name: editedName })).toBeVisible();
 
     // DELETE

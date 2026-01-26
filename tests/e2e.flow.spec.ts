@@ -13,10 +13,9 @@ test.describe('E2E Flow - Create -> View -> Delete (POM)', () => {
 
     const newDish = new NewDishPage(page);
     const unique = `E2E Full ${Date.now()}`;
-    await newDish.fillBasic(unique, 'E2E flow dish');
-    await newDish.addStepInput.fill('Paso A');
-    await newDish.addStepButton.click();
-    await newDish.save();
+    await newDish.fillBasicInfo(unique, 'E2E flow dish');
+    await newDish.addStep('Paso A', 0);
+    await newDish.submit();
 
     // find created item and view
     await expect(page.getByRole('heading', { level: 2, name: unique })).toBeVisible();
