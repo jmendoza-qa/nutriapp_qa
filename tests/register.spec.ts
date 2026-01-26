@@ -44,8 +44,8 @@ test.describe('Register', () => {
       { timeout: 30000 }
     );
 
-    // Submit the form (use form selector to avoid conflict with Logout button)
-    await page.locator('form').submit();
+    // Click the submit button (use getByRole with name to avoid Logout button conflict)
+    await page.getByRole('button', { name: /Registrarse/i }).click();
     
     // Wait for the API response
     const response = await responsePromise;

@@ -57,8 +57,8 @@ test.describe('Dishes Management', () => {
     );
     const urlPromise = page.waitForURL(/.*\/dishes/, { timeout: 15000 });
     
-    // Submit the form (use form selector to avoid conflict with Logout button)
-    await page.locator('form').submit();
+    // Click the submit button (use getByRole with name to avoid Logout button conflict)
+    await page.getByRole('button', { name: /Guardar/i }).click();
     
     // Wait for both the API response and navigation
     await Promise.all([responsePromise, urlPromise]);
