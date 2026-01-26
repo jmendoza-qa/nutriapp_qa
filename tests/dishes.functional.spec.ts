@@ -12,7 +12,7 @@ test.describe('Dishes - Functional (POM)', () => {
   test('Create a new dish and verify it appears in the list (happy path)', async ({ page }) => {
     const dishes = new DishesPage(page);
     await dishes.navigate();
-    await dishes.clickAddDish();
+    await dishes.goToNewDish();
 
     const newDish = new NewDishPage(page);
     const unique = `E2E Test Dish ${Date.now()}`;
@@ -30,7 +30,7 @@ test.describe('Dishes - Functional (POM)', () => {
   test('Create validation: missing name shows form still open', async ({ page }) => {
     const dishes = new DishesPage(page);
     await dishes.navigate();
-    await dishes.clickAddDish();
+    await dishes.goToNewDish();
 
     const newDish = new NewDishPage(page);
     await newDish.descriptionInput.fill('Solo descripción, sin nombre');

@@ -33,7 +33,7 @@ test.describe('Functional: Edit and Delete Dish (POM)', () => {
     await card.getByRole('link', { name: 'Editar' }).click();
 
     // Edit using EditDishPage
-    const { EditDishPage } = await import('../../pages/EditDishPage');
+    const { EditDishPage } = await import('../../page-objects/EditDishPage.js');
     const editForm = new EditDishPage(page);
     const editedName = baseName + ' (edited)';
     await editForm.updateName(editedName);

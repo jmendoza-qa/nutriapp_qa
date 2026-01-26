@@ -9,7 +9,7 @@ test.describe('E2E Flow - Create -> View -> Delete (POM)', () => {
     await expect(page).toHaveURL(/\/dishes/);
 
     const dishes = new DishesPage(page);
-    await dishes.clickAddDish();
+    await dishes.goToNewDish();
 
     const newDish = new NewDishPage(page);
     const unique = `E2E Full ${Date.now()}`;

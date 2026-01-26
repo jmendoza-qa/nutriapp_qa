@@ -12,7 +12,7 @@ test.describe('CRUD - Dishes (POM)', () => {
     await dishes.navigate();
 
     // CREATE
-    await dishes.clickAddDish();
+    await dishes.goToNewDish();
     const newDish = new NewDishPage(page);
     const baseName = `CRUD Dish ${Date.now()}`;
     await newDish.fillBasic(baseName, 'Created by CRUD test');

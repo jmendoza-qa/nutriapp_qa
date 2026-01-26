@@ -17,7 +17,7 @@ test.describe('Auth - Functional (POM)', () => {
 
   test('Shows validation when password missing (negative case)', async ({ page }) => {
     const login = new LoginPage(page);
-    await login.email.fill('test@nutriapp.com');
+    await login.emailInput.fill('test@nutriapp.com');
     await login.submitButton.click();
     // Expect to remain on login page and see the prompt to login
     await expect(page.getByText('Inicia sesión para continuar')).toBeVisible();
