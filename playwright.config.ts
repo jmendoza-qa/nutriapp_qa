@@ -26,6 +26,13 @@ export default defineConfig({
     ? [['html'], ['list']] // En CI: HTML + lista en consola
     : 'html', // Local: solo HTML
 
+  /* Shared settings for all projects */
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    trace: 'on-first-retry',
+    ignoreHTTPSErrors: true,
+  },
+
   /* Configure projects for major browsers */
   projects: [
     {
