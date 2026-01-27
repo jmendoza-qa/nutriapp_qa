@@ -52,7 +52,7 @@ test.describe('Dishes Management', () => {
     
     // Set up response and URL listeners BEFORE submitting
     const responsePromise = page.waitForResponse(response => 
-      response.url().includes('/api/dishes') && response.method() === 'POST' && response.status() === 200,
+      response.url().includes('/api/dishes') && response.request().method() === 'POST' && response.status() === 200,
       { timeout: 30000 }
     );
     const urlPromise = page.waitForURL(/.*\/dishes/, { timeout: 15000 });
