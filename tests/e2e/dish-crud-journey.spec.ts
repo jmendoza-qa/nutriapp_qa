@@ -103,40 +103,44 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
     
     const countBeforeDelete = cardsAfterEdit.length;
     
+    // Get the card element before deletion to wait for it to disappear
+    const cardToDelete = await dishesPage.getDishCard(dishIndexToDelete);
+    const dishNameElement = cardToDelete.locator('h2');
+    
     // Set up response listener BEFORE clicking
     const deleteResponsePromise = page.waitForResponse(response => 
       response.url().includes(`/api/dishes/${dishIdToDelete}`) && 
-      response.request().method() === 'DELETE'
+      response.request().method() === 'DELETE' &&
+      response.status() === 200
     );
     
     // Click delete button
     await dishesPage.clickDeleteDish(dishIndexToDelete);
     
-    // Wait for API response
+    // Wait for API response to confirm deletion
     const deleteResponse = await deleteResponsePromise;
     expect(deleteResponse.status()).toBe(200);
     
-    // Wait for navigation back to dishes list (if it happens)
+    // Wait for the dish card to disappear from the UI (React state update)
+    // This ensures the client-side state has been updated
     try {
-      await page.waitForURL(/.*\/dishes/, { timeout: 5000 });
+      await expect(dishNameElement).not.toBeVisible({ timeout: 5000 });
     } catch {
-      // If no navigation, that's okay - we'll reload anyway
+      // If it doesn't disappear immediately, that's okay - we'll verify after reload
     }
     
-    // Wait a bit for React state to update
-    await page.waitForTimeout(2000);
+    // Wait a bit for React state to update and any animations
+    await page.waitForTimeout(1000);
     
     // Reload the page to get fresh state from server
     // This ensures we're seeing the actual state after deletion
     await page.reload();
     await page.waitForLoadState('networkidle');
-    
-    // Wait a bit more to ensure the page is fully rendered
     await page.waitForTimeout(1000);
     
     // Verify the dish was removed from the list with retry logic
     let dishStillPresent = true;
-    let retries = 5;
+    let retries = 3;
     let cardsAfterDelete: any[] = [];
     
     while (retries > 0 && dishStillPresent) {
@@ -146,6 +150,12 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
       
       // Get fresh cards after reload
       cardsAfterDelete = await dishesPageAfterReload.getDishCards();
+      
+      // If no cards, dish is definitely gone
+      if (cardsAfterDelete.length === 0) {
+        dishStillPresent = false;
+        break;
+      }
       
       // Get all dish names from fresh cards
       const remainingNames = await Promise.all(
@@ -159,8 +169,12 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
         })
       );
       
-      // Check if the dish is still present
-      dishStillPresent = remainingNames.some(name => name && name === updatedDishName.trim());
+      // Check if the dish is still present (normalize both names for comparison)
+      const normalizedUpdatedName = updatedDishName.trim().toLowerCase();
+      dishStillPresent = remainingNames.some(name => {
+        if (!name) return false;
+        return name.trim().toLowerCase() === normalizedUpdatedName;
+      });
       
       if (!dishStillPresent) {
         // Dish is gone, test passes
@@ -169,10 +183,10 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
       
       // If dish is still present, wait and reload again
       if (retries > 1) {
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(3000);
         await page.reload();
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(2000);
       }
       
       retries--;
