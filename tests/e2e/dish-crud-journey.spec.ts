@@ -103,10 +103,6 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
     
     const countBeforeDelete = cardsAfterEdit.length;
     
-    // Get the card element before deletion to wait for it to disappear
-    const cardToDelete = await dishesPage.getDishCard(dishIndexToDelete);
-    const dishNameElement = cardToDelete.locator('h2');
-    
     // Set up response listener BEFORE clicking
     const deleteResponsePromise = page.waitForResponse(response => 
       response.url().includes(`/api/dishes/${dishIdToDelete}`) && 
@@ -121,81 +117,38 @@ test.describe('End-to-End: Dish CRUD Journey', () => {
     const deleteResponse = await deleteResponsePromise;
     expect(deleteResponse.status()).toBe(200);
     
-    // Wait for the dish card to disappear from the UI (React state update)
-    // This ensures the client-side state has been updated
-    try {
-      await expect(dishNameElement).not.toBeVisible({ timeout: 5000 });
-    } catch {
-      // If it doesn't disappear immediately, that's okay - we'll verify after reload
-    }
+    // Wait for the dish name to disappear from the page (React state update)
+    await expect(page.getByText(updatedDishName, { exact: true })).not.toBeVisible({ timeout: 10000 });
     
-    // Wait a bit for React state to update and any animations
-    await page.waitForTimeout(1000);
+    // Primary verification: assert via API that the dish is gone (source of truth)
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    const listRes = await page.request.get(`${baseURL}/api/dishes`);
+    expect(listRes.ok()).toBe(true);
+    const listData = await listRes.json();
+    const dishesAfterDelete: { id: number; name: string }[] = listData.dishes || [];
+    const deletedStillInApi = dishesAfterDelete.some(
+      (d) => String(d.id) === dishIdToDelete || d.name.trim() === updatedDishName.trim()
+    );
+    expect(deletedStillInApi).toBe(false);
     
-    // Reload the page to get fresh state from server
-    // This ensures we're seeing the actual state after deletion
-    await page.reload();
+    // Secondary verification: UI list should not show the deleted dish (fresh navigation)
+    await page.goto('/dishes');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
+    const dishesPageAfter = new DishesPage(page);
+    await expect(dishesPageAfter.heading).toBeVisible();
+    const cardsAfterDelete = await dishesPageAfter.getDishCards();
     
-    // Verify the dish was removed from the list with retry logic
-    let dishStillPresent = true;
-    let retries = 3;
-    let cardsAfterDelete: any[] = [];
-    
-    while (retries > 0 && dishStillPresent) {
-      // Re-initialize dishes page to get fresh state
-      const dishesPageAfterReload = new DishesPage(page);
-      await expect(dishesPageAfterReload.heading).toBeVisible();
-      
-      // Get fresh cards after reload
-      cardsAfterDelete = await dishesPageAfterReload.getDishCards();
-      
-      // If no cards, dish is definitely gone
-      if (cardsAfterDelete.length === 0) {
-        dishStillPresent = false;
-        break;
-      }
-      
-      // Get all dish names from fresh cards
+    if (cardsAfterDelete.length > 0) {
       const remainingNames = await Promise.all(
-        cardsAfterDelete.map(async (_, idx) => {
-          try {
-            const name = await dishesPageAfterReload.getDishName(idx);
-            return name ? name.trim() : null;
-          } catch {
-            return null;
-          }
-        })
+        cardsAfterDelete.map((_, idx) =>
+          dishesPageAfter.getDishName(idx).then((n) => (n || '').trim()).catch(() => '')
+        )
       );
-      
-      // Check if the dish is still present (normalize both names for comparison)
-      const normalizedUpdatedName = updatedDishName.trim().toLowerCase();
-      dishStillPresent = remainingNames.some(name => {
-        if (!name) return false;
-        return name.trim().toLowerCase() === normalizedUpdatedName;
-      });
-      
-      if (!dishStillPresent) {
-        // Dish is gone, test passes
-        break;
-      }
-      
-      // If dish is still present, wait and reload again
-      if (retries > 1) {
-        await page.waitForTimeout(3000);
-        await page.reload();
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(2000);
-      }
-      
-      retries--;
+      const normalizedUpdated = updatedDishName.trim().toLowerCase();
+      const dishStillInUi = remainingNames.some((n) => n.toLowerCase() === normalizedUpdated);
+      expect(dishStillInUi).toBe(false);
     }
     
-    // Final verification: the deleted dish name should not be in the list
-    expect(dishStillPresent).toBe(false);
-    
-    // Also verify count decreased (if there were multiple dishes)
     if (countBeforeDelete > 1) {
       expect(cardsAfterDelete.length).toBeLessThan(countBeforeDelete);
     }
